@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html >
+    <head>
+        <meta charset="UTF-8">
+        <title>Controle voo</title>
+
+
+
+        <style>
+            /* NOTE: The styles were added inline because Prefixfree needs access to your styles and they must be inlined if they are on local disk! */
+            /* -------------------------------------
+       * Set to false if you are not using Chrome
+       * ------------------------------------- */
+            /* -------------------------------------
+             * Styles
+             * ------------------------------------- */
+            @import url(http://fonts.googleapis.com/css?family=Source+Sans+Pro);
+            body {
+                max-width: 1200px;
+                margin: 50px auto 0;
+                padding: 0 5%;
+                font: 16px/1.5 "Source Sans Pro", sans-serif;
+                color: #eee9dc;
+                background: #3f9cca;
+            }
+
+            h2, #note {
+                margin: 0;
+            }
+
+            #timeline {
+                margin-top: 480px;
+                padding: 0;
+                border-top: 8px solid #eee9dc;
+                list-style: none;
+                display: flex;
+            }
+            #timeline li {
+                padding-top: 30px;
+                position: relative;
+                flex: 1;
+                transition: all 0.4s ease-in-out;
+            }
+            #timeline li:hover {
+                padding-bottom: 80px;
+                flex: 2;
+            }
+            #timeline li:hover label {
+                opacity: 1;
+                transform: translateY(10px);
+            }
+
+            label {
+                max-width: 200px;
+                margin: 0 auto;
+                padding: 5px 10px;
+                border-width: 2px;
+                border-style: solid;
+                border-color: #eee9dc;
+                border-radius: 5px;
+                position: absolute;
+                left: 0;
+                right: 0;
+                cursor: pointer;
+                opacity: 0;
+                transition: opacity 0.1s ease-in-out, transform 0.1s ease-in-out;
+            }
+            label:before, label:after {
+                content: "";
+                width: 0;
+                height: 0;
+                border: solid transparent;
+                position: absolute;
+                bottom: 100%;
+                pointer-events: none;
+            }
+            label:before {
+                border-bottom-color: #eee9dc;
+                border-width: 15px;
+                left: 52%;
+                margin-left: -15px;
+            }
+            label:after {
+                border-bottom-color: #3f9cca;
+                border-width: 12px;
+                left: 52%;
+                margin-left: -12px;
+            }
+            label span {
+                text-align: center;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                display: block;
+            }
+
+            .date {
+                width: 100%;
+                padding-bottom: 30px;
+                text-align: center;
+                position: absolute;
+                top: -60px;
+                display: block;
+            }
+
+            .circle {
+                width: 10px;
+                height: 10px;
+                margin-left: -5px;
+                background: #3f9cca;
+                border: 5px solid #eee9dc;
+                border-radius: 50%;
+                position: absolute;
+                top: -14px;
+                left: 50%;
+            }
+
+            .content {
+                width: 800px;
+                height: 240px;
+                margin: 0 auto;
+                border: 2px solid #eee9dc;
+                border-radius: 8px;
+                position: fixed;
+                top: 200px;
+                left: 0;
+                right: 0;
+                z-index: 100;
+                background: #3f9cca;
+                transform: perspective(1000px) rotateY(20deg);
+                animation: switching_back 0.8s;
+            }
+            .content h3, .content p {
+                margin: 0 20px 10px;
+                text-align: justify;
+                opacity: 0;
+            }
+            .content h3 {
+                margin-top: 20px;
+            }
+
+            .radio {
+                display: none;
+            }
+
+            .radio:checked + label {
+                opacity: 1;
+                transform: translateY(10px);
+                transition: opacity 0.4s ease-in-out 0.25s, transform 0.3s ease-in-out 0.25s;
+            }
+            .radio:checked ~ .circle {
+                background: #f98262;
+            }
+            .radio:checked ~ .content {
+                z-index: 999;
+                transform: perspective(1000px) rotateY(15deg) translate(40px, 25px);
+                animation: switching 1s ease;
+            }
+            .radio:checked ~ .content h3, .radio:checked ~ .content p {
+                opacity: 1;
+                transition: opacity 0.4s ease-in-out 0.4s;
+            }
+
+            @keyframes switching {
+                0% {
+                    transform: perspective(1000px) rotateY(20deg);
+                }
+                40% {
+                    transform: perspective(1000px) rotateY(15deg) translate(100px, 35px);
+                }
+                100% {
+                    transform: perspective(1000px) rotateY(15deg) translate(40px, 25px);
+                }
+            }
+            @keyframes switching_back {
+                0% {
+                    transform: perspective(1000px) rotateY(15deg) translate(40px, 25px);
+                    z-index: 200;
+                }
+                40% {
+                    transform: perspective(1000px) rotateY(15deg) translate(0px, 0px) scale(1.08);
+                }
+                100% {
+                    transform: perspective(1000px) rotateY(20deg);
+                    z-index: 100;
+                }
+            }
+
+        </style>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/prefixfree/1.0.7/prefixfree.min.js"></script>
+
+    </head>
+
+    <body>
+        <h2>Controle de Voos API</h2>
+        <p id="note">Este é um sistema de controle de voos proposto pelo professor Manoel Campos.</p>
+        <ul id='timeline'>
+            <li class='entry'>
+                <input checked='checked' class='radio' id='trigger5' name='trigger' type='radio'>
+                <label for='trigger5'>
+                    <span>
+                        Consulta de voos pelas URI
+                    </span>
+                </label>
+                <span class='date'>Passo 1</span>
+                <span class='circle'></span>
+                <div class='content'>
+                    <h3>Você pode consultar voos por origem e destino</h3>
+                    <p>
+                        É um processo muito fácil basta colocar na URI os parâmetros de origem e destino do(s) voo(s).
+                    </p>
+                    <p>
+                        E utilizando o método GET Você pode ter uma lista de voos como retorno em JSON. Como fazer: URI/api/voo/Palmas/Brasília.
+                    </p>
+                </div>
+            </li>
+            <li class='entry'>
+                <input class='radio' id='trigger4' name='trigger' type='radio'>
+                <label for='trigger4'>
+                    <span>
+                        Consulta voos por origem/destino e outros
+                    </span>
+                </label>
+                <span class='date'>Passo 2</span>
+                <span class='circle'></span>
+                <div class='content'>
+                    <h3>Consulta voos por origem/destino e data de partida</h3>
+                    <h3> E Consulta voos por origem/destino e data de partida/faixa de preço</h3>
+                    <p>
+                        Como fazer: URI/api/voo/Palmas/Brasília/21-01-2020 --> localhost:8080/api/voo/Palmas/Brasília/21-01-2020
+                    </p>
+                    <p>
+                        Agora observe como fazer com a faixa de preço: URI/api/voo/Palmas/Brasília/21-01-2020/15.
+                    </p>
+                    <p>
+                        -->   localhost:8080/api/voo/Palmas/Brasília/21-01-2020/15
+                    </p>
+                </div>
+            </li>
+            <li class='entry'>
+                <input class='radio' id='trigger3' name='trigger' type='radio'>
+                <label for='trigger3'>
+                    <span>
+                        Agora o crud de reservas
+                    </span>
+                </label>
+                <span class='date'>Passo 3</span>
+                <span class='circle'></span>
+                <div class='content'>
+                    <h3>Aqui você aprendera a fazer as reservas</h3>
+                    <p>
+                        Aqui pode parecer um pouco complexo, mas não é um bicho de sete cabeças.
+                    </p>
+                    <p>
+                        Para você fazer uma reserva, você precisa saber o id do voo, pois é claro, você irá reservar 
+                    <p>
+                        um voo.
+                    </p>
+                    <p>
+                        Logo, você utilizará a URI/reserva/ utilizando o método POST e no corpo da requisição colocará o id do voo
+                    </p>
+                    <p>
+                        Ex.: {"voo":{"id":"3"}}
+                    </p>
+                </div>
+            </li>
+            <li class='entry'>
+                <input class='radio' id='trigger2' name='trigger' type='radio'>
+                <label for='trigger2'>
+                    <span>
+                        Crud de reservas
+                    </span>
+                </label>
+                <span class='date'>Passo 4</span>
+                <span class='circle'></span>
+                <div class='content'>
+                    <h3>Aqui você aprenderá a deletar reservas</h3>
+                    <p>
+                        Por meio da URI com o id como paramêtro e utilizando o método DELETE você poderá deletar uma reserva
+                    </p>
+                    <p>
+                        Você pode fazer assim: URI/reserva/idDaReserva --> localhost:8080/reserva/1
+                    </p>
+                </div>
+            </li>
+            <li class='entry'>
+                <input class='radio' id='trigger1' name='trigger' type='radio'>
+                <label for='trigger1'>
+                    <span>
+                        Alterar reserva
+                    </span>
+                </label>
+                <span class='date'>Passo 5</span>
+                <span class='circle'></span>
+                <div class='content'>
+                    <h3>Você poderá alterar uma reserva assim:</h3>
+                    <p>
+                        É preciso ter em mente o id da reserva que deseja alterar e colocar as mudanças no corpo da requisição 
+                    </p>
+                    <p>
+                        Utilize a com o método PUT URI/reserva/ --> localhost:8080/reserva 
+                    </p>
+
+                    <p>
+                        e no corpo pode usar como referência: {"id": "1","voo":{"id":"3"} }
+                    </p>
+                </div>
+            </li>
+        </ul>
+
+
+    </body>
+</html>
